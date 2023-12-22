@@ -1,0 +1,32 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chatbot Page</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+
+</head>
+<body>
+    {% include 'header.html' %}
+    <div class="container">
+    <h1>Telegram Chatbot Configuration Page</h1>
+    <div class="form-container">
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        {% for field in form %}
+            <div>
+                {{ field.label_tag }}: {{ field }}
+                {{ field.errors }}
+            </div>
+        {% endfor %}
+
+        <input type="submit" value="Submit">
+    </form>
+    </div>
+</div>
+</body>
+{% include 'footer.html' %}
+</html>

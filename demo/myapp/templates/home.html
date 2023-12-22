@@ -1,0 +1,36 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+    <!-- Include the header -->
+    {% include 'header.html' %}
+
+    <hr class="my-4"> <!-- Adding a horizontal line as a separator -->
+
+    <div class="card-deck">
+
+        {% for product in products %}
+            <div class="card">
+              <img class="card-img-top" src="{{ product.image.url }}" alt="{{ product.title }}">
+              <div class="card-body">
+                <a href="{{ product.redirect_link }}" target="_blank"> <!-- Using the redirect_link as a URL -->
+                    <h5 class="card-title">{{ product.title }}</h5>
+                </a>
+                <p class="card-text">{{ product.description }}</p>
+                <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+              </div>
+            </div>
+        {% empty %}    
+        <p> No product available ! </p>
+        {% endfor %}
+    </div>
+
+
+    <!-- Include the footer -->
+    {% include 'footer.html' %}
+
+    <!-- Include Bootstrap JS -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+<div class="card-deck">
+
+{% for product in products %}
+    <div class="card">
+      <img class="card-img-top" src="{{ product.image.url }}" alt="product.title">
+      <div class="card-body">
+        <h5 class="card-title">product.title</h5>
+        <p class="card-text">product.description</p>
+        <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+      </div>
+    </div>
+{% empty %}    
+<p> No product available ! </p>
+{% endfor %}

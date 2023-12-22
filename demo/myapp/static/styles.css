@@ -1,0 +1,85 @@
+/* static/styles.css */
+
+
+/* Container styles */
+.container {
+    max-width: 600px;
+    margin: 50px auto;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+}
+
+/* Form styles */
+.form-container {
+    margin-top: 20px;
+}
+
+.form-container input[type="text"],
+.form-container input[type="file"],
+.form-container input[type="submit"] {
+    width: calc(100% - 22px);
+    padding: 12px 10px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease;
+}
+
+.form-container input[type="text"]:focus,
+.form-container input[type="file"]:focus {
+    outline: none;
+    border-color: #6f42c1;
+}
+
+.form-container input[type="submit"] {
+    background-color: #6f42c1;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.form-container input[type="submit"]:hover {
+    background-color: #5a2d92;
+}
+
+/* Header styles */
+header {
+    background-color: #6f42c1; /* Background color for the header */
+    padding: 15px 0; /* Padding for top and bottom */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Adding a subtle shadow */
+}
+
+/* Navigation Bar */
+.navbar{
+    padding: 20px 10px 20px 0px;
+    background-color: #28a7e9;
+    transition: all ease 0.4s;
+  }
+  .navbar-brand{
+    font-size: 22px;
+    color: white !important;
+  }
+  .navbar .navbar-nav li a{
+    font-size: 16px;
+    color: white;
+  }
+  
+  /* Animation */
+  .animate{
+    padding: 0px 10px 0px 0px;
+    transition: all ease 0.4s;
+  }
+  
+  /* Jumbotron */
+  .jumbotron{
+    margin-top: 110px;
+  }
