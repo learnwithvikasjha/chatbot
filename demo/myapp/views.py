@@ -1,12 +1,12 @@
 from django.shortcuts import render, HttpResponse
-from .models import ChatbotData, Product
+from .models import ChatbotData, Product, UserBotData
 from django.shortcuts import get_object_or_404
 
 from django.shortcuts import render
 from django.core.exceptions import ValidationError
 from django.core.files import File
 import os
-from .forms import ChatbotForm
+from .forms import ChatbotForm, BotOptionsForm
 import pandas as pd
 import requests
 import json
@@ -14,17 +14,33 @@ import redis
 from django.views.decorators.csrf import csrf_exempt
 
 from myapp.cache import add_chatbot_data_to_redis  # Import your cache logic function
+from .bot_telegram import BotFunctionality
 
+def bot_options_view(request):
+    if request.method == 'POST':
+        form = BotOptionsForm(request.POST)
+        if form.is_valid():
+            form.save()  # Save form data to the database
+            # Redirect to a success page or perform other actions
+    else:
+        form = BotOptionsForm()
 
-REDIS_HOST = '192.168.1.19'
-REDIS_PORT = 6379
-REDIS_PASSWORD = 'password'
-r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, password=REDIS_PASSWORD)
+    return render(request, 'bot_options.html', {'form': form})
 
 # home page function
 def home(request):
     products = Product.objects.all()
-    return render(request, 'home.html', {'products': products})
+    stats = [{"number" : 150, "description" : "Bots Registered", "color": "bg-info"},
+             {"number" : 1234150, "description" : "Auto Replied", "color": "bg-success"},
+             {"number" : ".1 S", "description" : "Average Reply Duration", "color": "bg-warning"},
+             {"number" : 1234150, "description" : "Auto Replied", "color": "bg-success"}
+             
+             ]
+    return render(request, 'home.html', {'products': products, "stats": stats})
+
+# Login page function
+def login(request):
+    return render(request, 'login.html', {'message': "successfully loaded login page"})
 
 def delete_telegram_webhook(bot_token):
     telegram_api_url = f'https://api.telegram.org/bot{bot_token}/deleteWebhook'
@@ -33,7 +49,7 @@ def delete_telegram_webhook(bot_token):
 
 def create_telegram_webhook(bot_token, request):
     # current_domain = request.META['HTTP_HOST']
-    current_domain = "https://rnyfa-103-144-175-252.a.free.pinggy.link"
+    current_domain = "https://rnumr-103-144-175-252.a.free.pinggy.link"
         # Delete existing webhook first
     delete_response = delete_telegram_webhook(bot_token)
     print(delete_response)
@@ -44,9 +60,11 @@ def create_telegram_webhook(bot_token, request):
     response = requests.post(telegram_api_url)
     return response.json()
 
-def process_uploaded_file(uploaded_file, bot_token):
+def process_uploaded_file(uploaded_file, user, bot_token):
+    r = redis.StrictRedis(host='192.168.1.19', port=6379, db=0, password="password")
     df = pd.read_excel(uploaded_file)
     total_records = df.shape
+    UserBotData.objects.create(user=user, bot_token=bot_token)
     for index, row in df.iterrows():
         question = row['question']
         answer = row['answer']
@@ -59,10 +77,11 @@ def chatbot_page(request):
         form = ChatbotForm(request.POST, request.FILES)
 
         if form.is_valid():
+            user = form.cleaned_data['user']
             bot_token = form.cleaned_data['bot_token']
             uploaded_file = form.cleaned_data['excel_file']
             
-            total_records = process_uploaded_file(uploaded_file, bot_token)
+            total_records = process_uploaded_file(uploaded_file, user, bot_token)
             print(f"Total Records are: {total_records}")
                         # Pass the request object to retrieve the current domain
             webhook_response = create_telegram_webhook(bot_token, request)
@@ -75,31 +94,6 @@ def chatbot_page(request):
 
     return render(request, 'chatbot.html', {'form': form})
 
-def auto_reply(data, bot_token):
-    chat_id = data.get("message", {}).get("chat", {}).get("id")
-    message_id = data.get("message",{}).get("message_id",{})
-    user_id = data.get("message", {}).get("from",{}).get("id",{})
-    first_name = data.get("message", {}).get("from",{}).get("first_name", user_id)
-    user_name = data.get("message", {}).get("from",{}).get("username",first_name)
-    message = data.get("message", {}).get("text", {})
-    reply_msg = r.hget(f"qna:{bot_token}", message)
-    if reply_msg:
-        reply_msg = reply_msg.decode("utf-8")
-        to_url = 'https://api.telegram.org/bot{}/sendMessage?chat_id={}&text={}&reply_to_message_id={}&parse_mode=HTML'.format(bot_token, chat_id, reply_msg, message_id)
-        resp = requests.get(to_url)
-    else:
-    # Perform a query to get the answer based on the token and question
-        try:
-            print("checking if answer is available in database.")
-            chatbot_data = get_object_or_404(ChatbotData, bot_token=bot_token, question=message)
-            reply_msg = chatbot_data.answer
-            to_url = 'https://api.telegram.org/bot{}/sendMessage?chat_id={}&text={}&reply_to_message_id={}&parse_mode=HTML'.format(bot_token, chat_id, reply_msg, message_id)
-            resp = requests.get(to_url)
-        except Exception as e:
-            print(e)
-
-
-
 @csrf_exempt
 def dynamic_telegram_webhook(request, bot_token):
     print(type(request.body))
@@ -109,6 +103,7 @@ def dynamic_telegram_webhook(request, bot_token):
             print(data)
         else:
             data = request.body
-        auto_reply(data,bot_token)
+        bot = BotFunctionality(bot_token)
+        bot.handle_message(data)
         return HttpResponse(status=200)
     return HttpResponse("OK")

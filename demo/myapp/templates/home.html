@@ -1,12 +1,29 @@
-{% load static %}
+{% extends 'base.html' %}
 
-<!DOCTYPE html>
-<html lang="en">
-
+{% block content %}
     <!-- Include the header -->
     {% include 'header.html' %}
 
-    <hr class="my-4"> <!-- Adding a horizontal line as a separator -->
+    <hr class="my-4">
+
+    <div class="row">
+      {% for item in stats %}
+      <div class="col-lg-3 col-6">
+        <!-- small box -->
+        <div class="small-box {{ item.color }}">
+          <div class="inner">
+            <h3> {{ item.number }} </h3>
+            <p> {{ item.description }} </p>
+          </div>
+          <div class="icon">
+            <i class="ion ion-bag"></i>
+          </div>
+          <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
 
     <div class="card-deck">
 
@@ -30,7 +47,5 @@
     <!-- Include the footer -->
     {% include 'footer.html' %}
 
-    <!-- Include Bootstrap JS -->
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-</body>
-</html>
+
+{% endblock %}
